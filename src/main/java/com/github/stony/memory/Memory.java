@@ -50,7 +50,7 @@ public final class Memory {
      * @return the unsigned byte present at the address.
      */
     public int readByte(int address) {
-        return rawMemory[address];
+        return ((int) rawMemory[address]) & 0xff;
     }
 
     /**
@@ -59,6 +59,8 @@ public final class Memory {
      * @return the unsigned word present at the address.
      */
     public int readWord(short address) {
-        return ((rawMemory[address] << 8) + rawMemory[address + 1]);
+        final int unsignedFirstByte = ((int) rawMemory[address]) & 0xff;
+        final int unsignedSecondByte = ((int) rawMemory[address + 1]) & 0xff;
+        return (unsignedFirstByte << 8) | unsignedSecondByte;
     }
 }
