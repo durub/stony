@@ -3,6 +3,9 @@ package com.github.stony.memory;
 /**
  * Z files have three "kinds" of memory: static (which can not be read by the application), dynamic (which can be
  * accessed normally by the application) and high memory.
+ * <p>
+ * Default read mode is unsigned (readByte and readWord). Signed options are available (readSignedByte and readSignedWord).
+ * Writes are sign agnostic.
  */
 public final class Memory {
     /**
@@ -26,21 +29,21 @@ public final class Memory {
     }
 
     /**
-     * Writes an unsigned byte to the specified address.
+     * Writes a byte to the specified address.
      * @param address address.
-     * @param ubyte unsigned byte.
+     * @param byteValue byte.
      */
-    public void writeByte(int address, int ubyte) {
-        rawMemory[address] = (byte) ubyte; // no bounds checking at the moment
+    public void writeByte(int address, int byteValue) {
+        rawMemory[address] = (byte) byteValue; // no bounds checking at the moment
     }
 
     /**
-     * Writes an unsigned word to the specified address.
+     * Writes a word to the specified address.
      * @param address address.
-     * @param word unsigned word.
+     * @param word word.
      */
     public void writeWord(int address, int word) {
-        rawMemory[address] = (byte) (word >> 8);
+        rawMemory[address] = (byte) ((word >> 8) & 0xff);
         rawMemory[address + 1] = (byte) (word & 0xff);
     }
 
@@ -54,6 +57,15 @@ public final class Memory {
     }
 
     /**
+     * Reads a signed byte from the specified address.
+     * @param address byte's address.
+     * @return the signed byte present at the address.
+     */
+    public int readSignedByte(int address) {
+        return rawMemory[address];
+    }
+
+    /**
      * Reads an unsigned word from the specified address.
      * @param address word's address.
      * @return the unsigned word present at the address.
@@ -62,5 +74,16 @@ public final class Memory {
         final int unsignedFirstByte = ((int) rawMemory[address]) & 0xff;
         final int unsignedSecondByte = ((int) rawMemory[address + 1]) & 0xff;
         return (unsignedFirstByte << 8) | unsignedSecondByte;
+    }
+
+    /**
+     * Reads a signed word from the specified address.
+     * @param address word's address.
+     * @return the signed word present at the address.
+     */
+    public int readSignedWord(int address) {
+        final int signedFirstByte = (int) rawMemory[address];
+        final int unsignedSecondByte = ((int) rawMemory[address + 1]) & 0xff;
+        return (signedFirstByte << 8) | unsignedSecondByte;
     }
 }
