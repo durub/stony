@@ -41,7 +41,7 @@ public final class Memory {
      */
     public void writeWord(int address, int word) {
         rawMemory[address] = (byte) (word >> 8);
-        rawMemory[address + 1] = (byte) (word & 0x0f);
+        rawMemory[address + 1] = (byte) (word & 0xff);
     }
 
     /**
@@ -58,7 +58,7 @@ public final class Memory {
      * @param address word's address.
      * @return the unsigned word present at the address.
      */
-    public int readWord(short address) {
+    public int readWord(int address) {
         final int unsignedFirstByte = ((int) rawMemory[address]) & 0xff;
         final int unsignedSecondByte = ((int) rawMemory[address + 1]) & 0xff;
         return (unsignedFirstByte << 8) | unsignedSecondByte;
