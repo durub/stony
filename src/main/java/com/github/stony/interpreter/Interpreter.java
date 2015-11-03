@@ -63,4 +63,46 @@ public final class Interpreter {
             // VAR - variable
         }
     }
+
+    /**
+     * Converts a packed address to a byte address. Valid for routine calls.
+     * @param packedAddress packed address.
+     * @return byte address converted from packed address.
+     */
+    int packedAddressToByteAddressRoutine(int packedAddress) {
+        if (header.getVersionNumber() == 6 || header.getVersionNumber() == 7) {
+            return packedAddressToByteAddress(packedAddress) + 8 * header.getRoutinesOffset();
+        } else {
+            return packedAddressToByteAddress(packedAddress);
+        }
+    }
+
+    /**
+     * Converts a packed address to a byte address. Valid for print_paddr.
+     * @param packedAddress packed address.
+     * @return byte address converted from packed address.
+     */
+    int packedAddressToByteAddressPrintAddr(int packedAddress) {
+        if (header.getVersionNumber() == 6 || header.getVersionNumber() == 7) {
+            return packedAddressToByteAddress(packedAddress) + 8 * header.getStaticStringsOffset();
+        } else {
+            return packedAddressToByteAddress(packedAddress);
+        }
+    }
+
+    private int packedAddressToByteAddress(int packedAddress) {
+        final byte version = header.getVersionNumber();
+        final int multiplier;
+        if (version > 0 && version <= 3) {
+            multiplier = 2;
+        } else if (version >= 4 && version <= 7) {
+            multiplier = 4;
+        } else if (version == 8) {
+            multiplier = 8;
+        } else {
+            throw new RuntimeException("Unknown version: " + version);
+        }
+
+        return multiplier * packedAddress;
+    }
 }

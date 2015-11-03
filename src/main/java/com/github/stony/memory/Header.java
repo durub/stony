@@ -17,6 +17,8 @@ public final class Header {
     private static final short GLOBAL_VARIABLES_TABLE_LOCATION_ADDRESS = 0xc;
     private static final short STATIC_MEMORY_BASE_ADDRESS = 0xe;
     private static final short FILE_LENGTH_ADDRESS = 0x1a;
+    private static final short ROUTINES_OFFSET_ADDRESS = 0x28;
+    private static final short STATIC_STRINGS_OFFSET_ADDRESS = 0x2a;
 
     /**
      * Constructs a Header from a Memory instance.
@@ -71,6 +73,32 @@ public final class Header {
     }
 
     /**
+     * Returns the routines offset. This value is divided by 8.
+     * The "real" value can be adquired by multiplying it by 8.
+     *
+     * @return the routines offset, divided by 8.
+     */
+    public int getRoutinesOffset() {
+        if (getVersionNumber() < 6) {
+            throw new UnsupportedAccessException(6);
+        }
+        return memory.readWord(ROUTINES_OFFSET_ADDRESS);
+    }
+
+    /**
+     * Returns the static strings offset. This value is divided by 8.
+     * The "real" value can be adquired by multiplying it by 8.
+     *
+     * @return the static strings offset, divided by 8.
+     */
+    public int getStaticStringsOffset() {
+        if (getVersionNumber() < 6) {
+            throw new UnsupportedAccessException(6);
+        }
+        return memory.readWord(STATIC_STRINGS_OFFSET_ADDRESS);
+    }
+
+    /**
      * Returns the file length. Supported on version 3 and above.
      * @return the file length of the story.
      */
@@ -79,15 +107,15 @@ public final class Header {
             throw new UnsupportedAccessException(3);
         }
 
-        int constant;
+        final int multiplier;
         if (getVersionNumber() <= 3) {
-            constant = 2;
+            multiplier = 2;
         } else if (getVersionNumber() == 4 || getVersionNumber() == 5) {
-            constant = 4;
+            multiplier = 4;
         } else {
-            constant = 8;
+            multiplier = 8;
         }
 
-        return constant * memory.readWord(FILE_LENGTH_ADDRESS);
+        return multiplier * memory.readWord(FILE_LENGTH_ADDRESS);
     }
 }
