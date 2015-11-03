@@ -41,6 +41,8 @@ public class Stony {
         }
 
         interpreter = new Interpreter(fileData, inputStream, outputStream);
-        interpreter.executeInstruction();
+        while (!interpreter.isFinished()) {
+            interpreter.executeInstruction();
+        }
     }
 }

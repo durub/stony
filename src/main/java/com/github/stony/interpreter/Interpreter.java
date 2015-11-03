@@ -14,6 +14,10 @@ public final class Interpreter {
     final OutputStream outputStream;
     final Stack<Integer> stack;
     final private Instruction instruction;
+    private boolean finished;
+
+    /* Program counter offset */
+    int pcOffset;
 
     /* Program counter */
     int pc;
@@ -25,6 +29,7 @@ public final class Interpreter {
         this.outputStream = outputStream;
         this.stack = new Stack<>();
         this.instruction = new Instruction(this);
+        this.finished = false;
         this.pc = this.header.getProgramCounterInitialValue();
     }
 
@@ -32,23 +37,31 @@ public final class Interpreter {
         decodeInstruction();
     }
 
+    public boolean isFinished() {
+        return finished;
+    }
+
     private void decodeInstruction() {
-        int firstByte = memory.readByte(pc);
+        final int firstByte = memory.readByte(pc);
 
         if (firstByte >= 0x00 && firstByte <= 0x1f) {
-            // 2OP - long, small constant, small constant
+            //System.out.println("2OP - long, small constant, small constant");
+            executeTwoOpSmallSmall();
         } else if (firstByte >= 0x20 && firstByte <= 0x3f) {
-            // 2OP - long, small constant, variable
+            //System.out.println("2OP - long, small constant, variable");
+            executeTwoOpSmallVariable();
         } else if (firstByte >= 0x40 && firstByte <= 0x5f) {
-            // 2OP - long, variable, small constant
+            //System.out.println("2OP - long, variable, small constant");
+            executeTwoOpVariableSmall();
         } else if (firstByte >= 0x60 && firstByte <= 0x7f) {
-            // 2OP - long, variable, variable
+            //System.out.println("2OP - long, variable, variable");
+            executeTwoOpVariableVariable();
         } else if (firstByte >= 0x80 && firstByte <= 0x8f) {
-            // 1OP - short, large constant
+            System.out.println("1OP - short, large constant");
         } else if (firstByte >= 0x90 && firstByte <= 0x9f) {
-            // 1OP - short, small constant
+            System.out.println("1OP - short, small constant");
         } else if (firstByte >= 0xa0 && firstByte <= 0xaf) {
-            // 1OP - short, variable
+            System.out.println("1OP - short, variable");
         } else if (firstByte == 0xbe) {
             if (header.getVersionNumber() < 5) {
                 // long
@@ -56,11 +69,153 @@ public final class Interpreter {
                 // extended
             }
         } else if (firstByte >= 0xb0 && firstByte <= 0xbf) {
-            // 0OP - short
+            //System.out.println("0OP - short");
+            executeZeroOpShort();
         } else if (firstByte >= 0xc0 && firstByte <= 0xdf) {
-            // 2OP - variable
+            //System.out.println("2OP - variable");
+            executeTwoOpVariable();
         } else if (firstByte >= 0xe0 && firstByte <= 0xff) {
             // VAR - variable
+            //System.out.println("VAR - variable");
+            executeVariable();
+        }
+    }
+
+    private void executeZeroOpShort() {
+        final int opcode = memory.readByte(pc) & 0x0f;
+
+        if (opcode == Opcodes.QUIT) {
+            finished = true;
+        } else {
+            throw new RuntimeException("Unknown 0OP opcode: " + opcode);
+        }
+    }
+
+    private void executeVariable() {
+        final int opcode = memory.readByte(pc) & 0x1f;
+        //final int operandTypes = memory.readByte(pc + 1);
+
+        if (opcode == Opcodes.PRINT_NUM) {
+            instruction.print_num();
+        } else {
+            throw new RuntimeException("Unknown VAR opcode: " + opcode);
+        }
+    }
+
+    /* Methods for two operands */
+    private void executeTwoOpSmallSmall() {
+        final int op1 = memory.readByte(pc + 1);
+        final int op2 = memory.readByte(pc + 2);
+        pcOffset = 3;
+        executeTwoOp(op1, op2);
+    }
+
+    private void executeTwoOpVariableVariable() {
+        final int op1 = loadVariable(memory.readByte(pc + 1));
+        final int op2 = loadVariable(memory.readByte(pc + 2));
+        pcOffset = 3;
+        executeTwoOp(op1, op2);
+    }
+
+    private void executeTwoOpSmallVariable() {
+        final int op1 = memory.readByte(pc + 1);
+        final int op2 = loadVariable(memory.readByte(pc + 2));
+        pcOffset = 3;
+        executeTwoOp(op1, op2);
+    }
+
+    private void executeTwoOpVariableSmall() {
+        final int op1 = loadVariable(memory.readByte(pc + 1));
+        final int op2 = memory.readByte(pc + 2);
+        pcOffset = 3;
+        executeTwoOp(op1, op2);
+    }
+
+    private void executeTwoOpVariable() {
+        final int operandTypes = memory.readByte(pc + 1);
+        final int firstOperandType = operandTypes >> 6;
+        final int secondOperandType = (operandTypes >> 4) & 0x03;
+        final int op1;
+        final int op2;
+
+        pcOffset = 2;
+        op1 = readVariableOperand(firstOperandType);
+        op2 = readVariableOperand(secondOperandType);
+
+        executeTwoOp(op1, op2);
+    }
+
+    private int readVariableOperand(int operandType) {
+        int op;
+        switch (operandType) {
+            case 0x00:
+                op = memory.readWord(pc + pcOffset);
+                pcOffset += 2;
+                break;
+            case 0x01:
+                op = memory.readByte(pc + pcOffset);
+                pcOffset += 1;
+                break;
+            case 0x02:
+                op = loadVariable(memory.readByte(pc + pcOffset));
+                pcOffset += 1;
+                break;
+            case 0x03:
+            default:
+                op = -1;
+        }
+        return op;
+    }
+
+    private void executeTwoOp(int op1, int op2) {
+        final int opcode = memory.readByte(pc) & 0x1f;
+
+        if (opcode == Opcodes.ADD) {
+            instruction.add(op1, op2);
+        } else {
+            throw new RuntimeException("Unknown 2OP opcode: " + opcode);
+        }
+    }
+
+    /**
+     * Stores the value in a variable. Supports stack (0), local (0x01-0x0f) and global (0x10-0ff) variables.
+     * Variables are stored as word values.
+     *
+     * @param variableNumber variable number.
+     * @param value variable's new value.
+     */
+    void storeVariable(int variableNumber, int value) {
+        if (variableNumber == 0x00) {
+            stack.push(value);
+        } else if (variableNumber < 0x10) {
+            throw new UnsupportedOperationException("Local variables are not supported at the moment.");
+        } else if (variableNumber <= 0xff) {
+            variableNumber -= 0x10; /* adjust the offset to be in the range 0..f5, which can be summed directly */
+            variableNumber *= 2; /* variables are words, not bytes. multiply by two to get the correct address. */
+            memory.writeWord(header.getGlobalVariablesTableAddress() + variableNumber, value);
+        } else {
+            throw new RuntimeException("Invalid variable " + variableNumber);
+        }
+    }
+
+    /**
+     * Reads the value of a variable. Supports stack (0), local (0x01-0x0f) or global (0x10-0xff).
+     * Variables are read as word values.
+     *
+     * @param variable variable number.
+     * @return the variable's value.
+     */
+    int loadVariable(int variable) {
+        if (variable == 0x00) {
+            return stack.peek();
+        } else if (variable < 0x10) {
+            throw new UnsupportedOperationException("Local variables are not supported at the moment.");
+        } else if (variable <= 0xff) {
+            variable -= 0x10; /* adjust the offset to be in the range 0..f5, which can be summed directly */
+            variable *= 2; /* variables are words, not bytes. multiply by two to get the correct address. */
+            return memory.readSignedWord(header.getGlobalVariablesTableAddress() + variable);
+        } else {
+            throw new RuntimeException("Invalid variable " + variable);
         }
     }
 
