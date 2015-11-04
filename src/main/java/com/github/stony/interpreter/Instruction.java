@@ -38,6 +38,20 @@ public final class Instruction {
     }
 
     /**
+     * Multiplies a and b and stores into the variable identified by c.<br>
+     * [opcode] [a] [b] [c]
+     *
+     * @param a first operand.
+     * @param b second operand.
+     */
+    public void mul(int a, int b) {
+        final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
+        final int result = a * b;
+        interpreter.storeVariable(storeVariable, result);
+        interpreter.pc += interpreter.pcOffset + 1;
+    }
+
+    /**
      * Prints the number stored in the [a] variable.
      * [opcode] [operand_types] [a]
      */

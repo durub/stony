@@ -174,6 +174,8 @@ public final class Interpreter {
             instruction.add(op1, op2);
         } else if (opcode == Opcodes.SUB) {
             instruction.sub(op1, op2);
+        } else if (opcode == Opcodes.MUL) {
+            instruction.mul(op1, op2);
         } else {
             throw new RuntimeException("Unknown 2OP opcode: " + opcode);
         }
