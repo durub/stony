@@ -46,7 +46,7 @@ public final class Instruction {
      */
     public void mul(int a, int b) {
         final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
-        final int result = a * b;
+        final int result = ((short) a) * ((short) b); /* interpret a and b as signed 16 bits numbers */
         interpreter.storeVariable(storeVariable, result);
         interpreter.pc += interpreter.pcOffset + 1;
     }
@@ -60,7 +60,7 @@ public final class Instruction {
      */
     public void div(int a, int b) {
         final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
-        final int result = a / b;
+        final int result = ((short) a) / ((short) b); /* interpret a and b as signed 16 bits numbers */
         interpreter.storeVariable(storeVariable, result);
         interpreter.pc += interpreter.pcOffset + 1;
     }
