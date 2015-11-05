@@ -10,7 +10,7 @@ public final class Instruction {
     }
 
     /**
-     * Adds a and b and stores into the variable identified by c.<br>
+     * Adds a and b and stores the result into the variable identified by c.<br>
      * [opcode] [a] [b] [c]
      *
      * @param a first operand.
@@ -24,7 +24,7 @@ public final class Instruction {
     }
 
     /**
-     * Subtracts a and b and stores into the variable identified by c.<br>
+     * Subtracts a and b and stores the result into the variable identified by c.<br>
      * [opcode] [a] [b] [c]
      *
      * @param a first operand.
@@ -38,7 +38,7 @@ public final class Instruction {
     }
 
     /**
-     * Multiplies a and b and stores into the variable identified by c.<br>
+     * Multiplies a and b and stores the result into the variable identified by c.<br>
      * [opcode] [a] [b] [c]
      *
      * @param a first operand.
@@ -52,7 +52,7 @@ public final class Instruction {
     }
 
     /**
-     * Multiplies a and b and stores into the variable identified by c.<br>
+     * Divides a and b and stores the result into the variable identified by c.<br>
      * [opcode] [a] [b] [c]
      *
      * @param a first operand.
@@ -61,6 +61,20 @@ public final class Instruction {
     public void div(int a, int b) {
         final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
         final int result = ((short) a) / ((short) b); /* interpret a and b as signed 16 bits numbers */
+        interpreter.storeVariable(storeVariable, result);
+        interpreter.pc += interpreter.pcOffset + 1;
+    }
+
+    /**
+     * Performs a bitwise a OR b and stores the result into the variable identified by c.<br>
+     * [opcode] [a] [b] [c]
+     *
+     * @param a first operand.
+     * @param b second operand.
+     */
+    public void or(int a, int b) {
+        final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
+        final int result = a | b;
         interpreter.storeVariable(storeVariable, result);
         interpreter.pc += interpreter.pcOffset + 1;
     }
@@ -103,13 +117,6 @@ public final class Instruction {
         } else {
             interpreter.pc += 4;
         }
-    }
-
-    public void or() {
-        final int a = interpreter.memory.readByte(interpreter.pc + 1);
-        final int b = interpreter.memory.readByte(interpreter.pc + 2);
-        interpreter.stack.push(a | b);
-        interpreter.pc += 3;
     }
 
     public void call() {
