@@ -96,7 +96,9 @@ public final class Interpreter {
         //final int operandTypes = memory.readByte(pc + 1);
 
         if (opcode == Opcodes.PRINT_NUM) {
-            instruction.print_num();
+            final int variable = memory.readByte(pc + 2);
+            pcOffset = 3;
+            instruction.print_num(variable);
         } else {
             throw new RuntimeException("Unknown VAR opcode: " + opcode);
         }

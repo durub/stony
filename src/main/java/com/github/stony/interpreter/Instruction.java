@@ -66,7 +66,7 @@ public final class Instruction {
     }
 
     /**
-     * Performs a bitwise a OR b and stores the result into the variable identified by c.<br>
+     * Performs a bitwise OR (a OR b) and stores the result into the variable identified by c.<br>
      * [opcode] [a] [b] [c]
      *
      * @param a first operand.
@@ -80,18 +80,17 @@ public final class Instruction {
     }
 
     /**
-     * Prints the number stored in the [a] variable.
-     * [opcode] [operand_types] [a]
+     * Prints the number stored in the [variable] variable.
+     * [opcode] [operand_types] [variable]
      */
-    public void print_num() {
-        final int numVariable = interpreter.memory.readByte(interpreter.pc + 2);
-        final int num = interpreter.loadVariable(numVariable);
+    public void print_num(int variable) {
+        final int num = interpreter.loadVariable(variable);
         try {
             interpreter.outputStream.write(String.valueOf(num).getBytes());
         } catch (IOException e) {
             throw new RuntimeException("Error while writing to output stream.", e);
         }
-        interpreter.pc += 3;
+        interpreter.pc += interpreter.pcOffset;
     }
 
 
