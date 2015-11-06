@@ -102,6 +102,20 @@ public final class Instruction {
     }
 
     /**
+     * Performs a bitwise AND (a AND b) and stores the result into the variable identified by c.<br>
+     * [opcode] [a] [b] [c]
+     *
+     * @param a first operand.
+     * @param b second operand.
+     */
+    public void and(int a, int b) {
+        final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
+        final int result = a & b;
+        interpreter.storeVariable(storeVariable, result);
+        interpreter.pc += interpreter.pcOffset + 1;
+    }
+
+    /**
      * Prints the number stored in the [variable] variable.
      * [opcode] [operand_types] [variable]
      */
