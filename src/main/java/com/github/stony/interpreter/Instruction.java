@@ -46,7 +46,7 @@ public final class Instruction {
      */
     public void mul(int a, int b) {
         final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
-        final int result = ((short) a) * ((short) b); /* interpret a and b as signed 16 bits numbers */
+        final int result = ((short) a) * ((short) b); /* interpret a and b as signed 16 bits integers */
         interpreter.storeVariable(storeVariable, result);
         interpreter.pc += interpreter.pcOffset + 1;
     }
@@ -59,8 +59,30 @@ public final class Instruction {
      * @param b second operand.
      */
     public void div(int a, int b) {
+        if (b == 0) {
+            throw new RuntimeException("Division by zero when executing div instruction.");
+        }
+
         final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
-        final int result = ((short) a) / ((short) b); /* interpret a and b as signed 16 bits numbers */
+        final int result = ((short) a) / ((short) b); /* interpret a and b as signed 16 bits integers */
+        interpreter.storeVariable(storeVariable, result);
+        interpreter.pc += interpreter.pcOffset + 1;
+    }
+
+    /**
+     * Stores the remainder of a divided by b into the variable identified by c.<br>
+     * [opcode] [a] [b] [c]
+     *
+     * @param a first operand.
+     * @param b second operand.
+     */
+    public void mod(int a, int b) {
+        if (b == 0) {
+            throw new RuntimeException("Division by zero when executing div instruction.");
+        }
+
+        final int storeVariable = interpreter.memory.readByte(interpreter.pc + interpreter.pcOffset);
+        final int result = ((short) a) % ((short) b); /* interpret a and b as signed 16 bits integers */
         interpreter.storeVariable(storeVariable, result);
         interpreter.pc += interpreter.pcOffset + 1;
     }

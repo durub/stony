@@ -180,6 +180,8 @@ public final class Interpreter {
             instruction.mul(op1, op2);
         } else if (opcode == Opcodes.DIV) {
             instruction.div(op1, op2);
+        } else if (opcode == Opcodes.MOD) {
+            instruction.mod(op1, op2);
         } else if (opcode == Opcodes.OR) {
             instruction.or(op1, op2);
         } else {
