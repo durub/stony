@@ -1,4 +1,4 @@
-package interpreter;
+package com.github.stony.interpreter;
 
 import org.junit.Test;
 

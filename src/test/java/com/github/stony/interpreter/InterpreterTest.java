@@ -1,6 +1,5 @@
-package interpreter;
+package com.github.stony.interpreter;
 
-import com.github.stony.interpreter.Interpreter;
 import org.junit.Assert;
 
 import java.io.*;
