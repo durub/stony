@@ -84,7 +84,10 @@ public final class Interpreter {
     private void executeZeroOpShort() {
         final int opcode = memory.readByte(pc) & 0x0f;
 
-        if (opcode == Opcodes.QUIT) {
+        pcOffset = 1;
+        if (opcode == Opcodes.NEW_LINE) {
+            instruction.new_line();
+        } else if (opcode == Opcodes.QUIT) {
             finished = true;
         } else {
             throw new RuntimeException("Unknown 0OP opcode: " + opcode);

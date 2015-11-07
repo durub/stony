@@ -116,13 +116,26 @@ public final class Instruction {
     }
 
     /**
-     * Prints the number stored in the [variable] variable.
+     * Prints the number stored in the [variable] variable to the output stream.
      * [opcode] [operand_types] [variable]
      */
     public void print_num(int variable) {
         final int num = interpreter.loadVariable(variable);
         try {
             interpreter.outputStream.write(String.valueOf(num).getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException("Error while writing to output stream.", e);
+        }
+        interpreter.pc += interpreter.pcOffset;
+    }
+
+    /**
+     * Prints a line break to the output stream.
+     */
+    public void new_line() {
+        final String newLine = "\n"; /* currently, it's "\n" -- should it be platform dependent? */
+        try {
+            interpreter.outputStream.write(newLine.getBytes());
         } catch (IOException e) {
             throw new RuntimeException("Error while writing to output stream.", e);
         }
