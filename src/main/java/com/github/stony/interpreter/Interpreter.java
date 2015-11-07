@@ -277,4 +277,12 @@ public final class Interpreter {
 
         return multiplier * packedAddress;
     }
+
+    public InputStream getInputStream() {
+        return inputStream;
+    }
+
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
 }
