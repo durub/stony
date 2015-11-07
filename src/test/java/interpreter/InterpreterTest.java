@@ -5,6 +5,7 @@ import org.junit.Assert;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * Barebones framework to test story files. Testing classes should extend this.
@@ -23,7 +24,9 @@ class InterpreterTest {
      *
      * @param filePath resource file path.
      * @param output expected output.
-     * @throws IOException when the file doesn't exist or a read error occured.
+     *
+     * @throws FileNotFoundException when the file doesn't exist.
+     * @throws IOException when a read error occured.
      * @throws URISyntaxException when the file path doesn't convert to a valid URI.
      */
     protected void assertOutputEquals(String filePath, String output) throws IOException, URISyntaxException {
@@ -59,12 +62,19 @@ class InterpreterTest {
      *
      * @param filePath path to the resource file.
      * @return content of the resource file.
-     * @throws IOException when the file doesn't exist or a read error occured.
-     * @throws URISyntaxException when the file path doesn't convert to a valid URI.
+     *
+     * @throws FileNotFoundException when the file doesn't exist.
+     * @throws IOException when a read error occured.
+     * @throws URISyntaxException when the file path doesn't convert to a valid URI -- should not happen.
      */
     @SuppressWarnings("TryFinallyCanBeTryWithResources")
     protected byte[] readFileData(String filePath) throws IOException, URISyntaxException {
-        final File file = new File(getClass().getResource(filePath).toURI());
+        final URL url = getClass().getResource(filePath);
+        if (url == null) {
+            throw new FileNotFoundException("Invalid file path: " + filePath);
+        }
+
+        final File file = new File(url.toURI());
         final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
         try {
             byte[] bytes = new byte[(int) randomAccessFile.length()];
