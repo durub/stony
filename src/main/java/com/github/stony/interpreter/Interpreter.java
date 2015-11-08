@@ -189,6 +189,8 @@ public final class Interpreter {
             instruction.or(op1, op2);
         } else if (opcode == Opcodes.AND) {
             instruction.and(op1, op2);
+        } else if (opcode == Opcodes.STORE) {
+            instruction.store(op1, op2);
         } else {
             throw new RuntimeException("Unknown 2OP opcode: " + opcode);
         }

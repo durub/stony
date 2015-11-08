@@ -116,6 +116,18 @@ public final class Instruction {
     }
 
     /**
+     * Stores the value into the variable.<br>
+     * [opcode] [variable] [value]
+     *
+     * @param variable variable.
+     * @param value value to be stored.
+     */
+    public void store(int variable, int value) {
+        interpreter.storeVariable(variable, value);
+        interpreter.pc += interpreter.pcOffset;
+    }
+
+    /**
      * Prints the number stored in the [variable] variable to the output stream.
      * [opcode] [operand_types] [variable]
      */
