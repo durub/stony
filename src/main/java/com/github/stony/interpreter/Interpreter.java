@@ -87,6 +87,8 @@ public final class Interpreter {
         pcOffset = 1;
         if (opcode == Opcodes.NEW_LINE) {
             instruction.new_line();
+        } else if (opcode == Opcodes.POP) {
+            instruction.pop();
         } else if (opcode == Opcodes.QUIT) {
             finished = true;
         } else {

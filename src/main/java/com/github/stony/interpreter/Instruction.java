@@ -154,6 +154,14 @@ public final class Instruction {
         interpreter.pc += interpreter.pcOffset;
     }
 
+    /**
+     * Pops the last item from the stack.
+     */
+    public void pop() {
+        interpreter.stack.pop();
+        interpreter.pc += interpreter.pcOffset;
+    }
+
 
     /**
      * 2OP - long, small constant, small constant
